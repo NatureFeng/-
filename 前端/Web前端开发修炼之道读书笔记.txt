@@ -1,0 +1,227 @@
+﻿web标准--结构，样式和行为的分离，即html，css和javascript的分离。
+
+css是前端开发工程师的基本功，需要熟练，要求能兼容主流浏览器，如firefox，opera，safari，chrome以及喜闻乐见的IE系列。
+
+javascript的使用方面，不仅需要会使用原生的javascript，而且还要回使用javascript类库和ajax。
+
+需要对于后台语言有一定了解，例如asp.net或者php或者jsp等。
+i
+-----------------------------------
+
+欲精一行，必先通十行
+
+-----------------------------------
+
+写代码注意加注释以防二次开发时出现问题。
+
+前期构思很重要，要有一个完整的框架构成。
+
+-----------------------------------
+
+
+--------------html部分-------------
+标签的语义化使用
+div		division 分隔
+span	span 范围
+ol	    ordered list 排序列表
+ul	    unordered list 不排序列表，有序列表
+li      list item 列表项目
+dl	    definition list 定义列表
+dt 	    definition description 定义描述
+del 	deleted 删除
+ins	    inserted 插入
+h1~h6	header 1 to header 6 标题1到标题6
+p 		paragraph 段落
+hr 		horizontal rule 水平尺
+a		anchor 锚
+abbr	abbreviation 缩写词
+acronym acronym 取首字母的缩写词
+address address 地址
+var	 	variable 变量
+pre		preformatted 预定义格式
+blockquote block quotation 区块引用语
+strong	strong	加重
+em		emphasized	加重
+b 		bold 粗体
+i 		italic 斜体
+big 	big 变大
+small	small 变小
+sup		superscripted 上标
+sub		subscripted 下标
+br 		break 换行
+center	center	居中
+font	font 字体
+u 		underline 下划线
+s 		strikethrough 删除线
+fieldset fieldset 域集
+legend  legend 图标
+caption caption 标题
+
+
+语义化实例
+--1--
+<form action="" method="">
+	<fieldset>
+		<legend>登录表单</legend>
+		<p><label for="name">账号：</label><input type="text" id="name"></p>
+		<p><label for="pw">密码：</label><input type="text" id="pw"></p>
+	</fieldset>
+</form>
+--2--table的正确使用
+<table border="1">
+	<caption>几种页面实现的比较</caption><!--表格标题-->
+	<thead>
+		<tr><th>实现方式</th><th>代码量</th><th>搜索引擎友好</th><th>特殊终端兼容</th></tr>
+	</thead>
+	<tbody>
+		<tr><th>table布局</th><td>多</td><td>差</td><td>一般</td></tr>
+	</tbody>
+</table>
+表格标题要用caption，表头要用thead包围，主体部分用tbody，尾部用tfoot包围，表头和一般单元格要区分开，表头用th，一般单元格用td。
+
+-----------------------------
+
+语义化标签应该注意的一些问题
+1.尽可能少的使用无语义标签div和span；
+2.在语义不明显，既可以用p也可以用div的地方，尽量用p，因为p默认情况下有上下间距，去样式后的可读性更好，对兼容特殊终端有利；
+3.不要使用纯样式标签，例如b，font和u等，改用css设置。语义上需要强调的文本可以包在strong或者em标签里，strong和em有“强调”的语义，其中strong的默认样式是加粗，而em的默认样式是斜体。
+
+-----------标准模式和怪异模式--------------------
+
+为了确保向后兼容，浏览器厂商发明了标准模式和怪异模式这两种方法来解析网页。
+在标准模式中，浏览器根据规范表现页面；而怪异模式通常模拟老式浏览器的行为以防止老站点无法工作。这两种模式的差异比较大，比较典型的就是IE对盒模型的解析：在标准模式中，网页元素的宽度是由padding，border，width三者的宽度相加决定的；而在怪异模式中，width本身就包括了padding和border的宽度。此外，标准模式下块级元素的经典居中方式，设定width，然后margin-lfet：auto，margin-right：auto，在怪异模式下也无法工作。
+同样的代码，在怪异模式和标准模式下的表现相差甚远。因为发明怪异模式的目的是为了兼容老师浏览器下的代码，它的很多解析方式是不符合标准的。所以一般情况下我们应该避免出发怪异模式，选用标准模式。
+怪异模式是如何触发的呢，与DTD有关。DTD全程document type definition，即文档类型定义。DTD是一种保证html文档格式正确的有效方法，可以通过比较html文档和dtd文件来看文档是否符合规范，以及元素和标签使用是否正确。一个dtd文档包含元素的定义规则，元素间关系的定义规则，元素可以使用的属性，可以使用的实体或符号规则。
+
+按照W3C的标准，我们需要在html的最开始声明文件的dtd类型。如果漏写了dtd声明，firefox仍然会按照标准模式来解析网页，但在IE中就会触发怪异模式。
+
+因此，我们，要养成，书写DTD声明的好习惯。
+
+<如何组织CSS>
+我们要有两种使用css的能力。
+1.CSS的API，重点是如何用css控制页面内元素的样式；
+2.CSS框架，重点是如何对css进行组织。
+
+其中，前者属于基础部分，这部分的能力是用“对”和“错”来评判的，比如说，要把文字设置为红色，只能用color：red；这样的写法是对的，其他任何写法都是错的。没有“好”与“坏”，只有“错”与“对”。
+
+组织CSS的几种方式
+①.按功能划分：将控制字体的css集中在font.css文件里，将控制颜色的css几种在color.css文件里，将控制布局的css放在layout.css文件里；
+②.按区块划分：将头部的CSS放在head.css里，底部放在foot.css里，侧边栏放在sidebar.css里，主体放在main.css里；
+③.base.css+common.css+page.css。
+
+base层位于三者的最底层，提供css reset功能和粒度最小的通用类，原子类。这一层会被所有页面引用，是页面样式所需依赖的最底层。这一层的主要职能就是要为房子打好地基，并将建房的砖块准备充足。
+base层相对稳定，基本上不需要维护。
+
+common层位于中间，提供组件级的CSS类。提到组件，就不得不提“模块化”。“模块化”可以从样式和行为两个层面来考虑，与common层相关的是样式的模块化。我们可以将页面内的元素拆分成一小块一小块功能和样式相对独立的小“模块”，这些“模块”有些事很少重复的，有些是会大量重复的，我们可以将大量重读的模块视为一个组件。我们从页面中尽可能多的将组件提取出来，放在common层里面。common层就相当于MVC模式中的M（Model，模型）。为了保证重用性和灵活性，M需要尽可能将内部实现封装，对可能会经常变化的部分提供灵活的接口。
+common是网站级的，不同的网站有不同的common层，同一个网站只有一个common层。common层是放在一个comon.css文件里的，需要根据网站规模来决定。在团队合作中，common层最好由一个人负责，统一管理。
+
+page层位于最高层，提供页面级的样式。同样以建房子为比喻，page层就好比是房间内的装饰画，不同的房间张贴的装饰画各不相同。它不像砖块，所有房子都相同；也不像门窗，同一房子里都相同。它对重用性没有要求，可根据各个房间布置的需要任意张贴。
+page层是页面级的，每个页面都可能会有自己的page层CSS。page层的文件可以用<style type="text/css">标签内置于页面中，但这么做没有将样式彻底从html文件中分离出来。也可以根据页面写在诸如page1.css，page2.css，page3.css的文件里，这样做可以将样式很好地从html中分离出来，但可能会产生大量css文件，有些css文件可能非常小，带来维护上的麻烦。如果网站规模不会过于庞大，所有page层的代码可以放在一个page。这样的好处是浏览网页时只有首页的下载时间较长，浏览其他页面时反而较快。
+css中。根据页面配上注释，分块书写，便于维护。
+
+-----通用原子类的特殊要求---------
+1.“.fl”类和“.fr”类，除了设置float：left之外，还要设置display：line。熟悉CSS BUG的工程师应该一眼就能认出其作用，解决IE6的双外边距BUG。在IE6下，如果对元素设置了浮动，又设置了margin-left或者margin-right，margin会加倍。
+
+2.“.bc”类。这个类是“.blockCenter”，作为使块级元素居中。直接使用它是不足以使块级元素居中的，我们还需要设置宽度。通常情况下，我们可以把它和“.w100”，“.w200”类同时使用，例如：“<div class="bc w200"></div>”。
+
+3.“.clearfix”类。这个类用于在于在父容器直接清除子元素浮动。通常情况下，为了让浮动元素的父容器能够根据浮动元素的高度而自适应高度，有三种做法：
+	（1）.让父容器同时浮起来，例如：“<div class="fl"><div class="fl"></div></div>”；
+	（2）.让浮动元素后紧跟一个用于清除浮动的空标签，例如“<div><div class="fl"></div><div class="cb"></div></div>”；
+	（3）.给父容器挂一个特殊的class，直接从父容器清除浮动元素的浮动；例如“<div class="clearfix"><div class="fl"></div></div>”。
+但是第一种方法会让父容器也浮动起来，影响父元素后面的元素的布局，有副作用。第二种方法增加了一个空标签，破坏了语义化。第三种方法没有任何副作用，推荐使用。
+
+4."zoom"类。这个类有些特殊，它设置的样式是zoom：1，可能有些工程师对这个样式比较陌生。它不是CSS标准中的标准属性，而是IE的专有属性。提到zoom属性，就不得不提到IE的haslayout问题。在IE7发布之前，有些人推荐设置height：1%来触发haslayout，因为IE6会将height当成min-height来解析，所以height：1%不会引入副作用，但IE7发布以后，这种方式就不适用了。更好的触发haslayout的方式是设置zoom：1，不用担心引入任何副作用。
+
+----------------------------------------------
+
+命名法的问题
+
+	骆驼命名法用于区别不同单词，下划线用于表明从属关系。例如.timeList-lastItem
+----------------------------------------------
+
+一个标签多挂class，正所谓多用组合，少用继承。
+
+----------------------------------------------
+
+Z-index的相关问题以及Flash和IE6下的select元素，网页的Z轴在元素设置position为absolute或者relative后被激活，其大小由z-index设置，z-index越大，元素位置越靠上。
+
+z-index也可以设置为负数，但是如果在z-index为负值的层上设置点击事件，那么就无法顺利弹出提示信息。这是因为负数区在于z-index为0的body之下，被body挡住了。
+如果多个元素的z-index的值相同，那么html标签中后出现的元素会浮在先出现的元素之上。
+
+设置负边距可以让相邻元素的位置产生重叠，谁浮在上面，取决于html标签出现的先后，后出现的标签浮于先出现的标签之上。
+
+Flash插入网页中，如果和其他元素有重叠，无论我们如何设置z-index，Flash都会浮在其他元素之上。因为，浏览器解析页面时，会先判断元素的类型，如果是窗口类型的，会优先于非窗口类型的元素，显示在页面最顶端，如果同属非窗口类型的，才会判断z-index的大小。
+
+Flash嵌入页面中，有个wmode属性，用于指定窗口模式，其值有window（窗口），opaque（非窗口不透明），transparent（非窗口透明）三种。其中window表示Flash以窗口形式显示，opaque和transparent表示Flash以非窗口形式显示，如果不显示设置wmode属性，默认wmode值为window。所以，如果我们没有设置wmode值，或者设置wmode属性为window的话，Flash会以窗口类型显示的，其Z轴的优先级是高于所有非窗口类型的元素的，无论我们如何设置z-index也不会有效果。解决的办法就是设置wmode属性为opaque或者transparent。因为Flash在IE和Firedox下是用不同的标签嵌入的<IE下以object标签嵌入的，firefox是以embed标签嵌入的>，所以我们需要对两种标签分别进行设置。
+
+同样的，select元素在IE6下也是以窗口形式显示的，这是IE6的一个bug。想要解决这个问题如下：
+
+<style tyoe="text/css">
+#test{width: 200px; height: 200px; background: green; position: absolute; left: 50px; top: 10px; z-index: 1;}
+#testMask{width: 200px; height: 200px; positon: absolute; left: 50px; top: 10px; z-index: 1;}
+</style>
+<select><option>--请选择</option></select>
+<div id="test"></div>
+<iframe id="testMask" frameborder="0" scrolling="no"></iframe>
+
+即我们可以用一个和test同样大小的iframe放在test下面，select上面，用iframe遮住select。
+
+---------------------------------------------
+
+IE6下png图片插入的问题
+
+	在IE6中，插入的png图片，本该是透明的地方，在IE6下会显示为浅蓝色。可以使用IE下私有的滤镜功能来解决这个问题，格式如下：progid：DXImageTransform.Microsoft.AlphaImageLoader（src="png图片路径",sizingMethod="crop"）。
+脚本详见文件夹里的“一次性解决PNG透明度在IE6下显示问题的脚本.txt”
+它的实现原理是当页面加载完成后，先遍历页面的内所有的图片元素，找到后缀为.png的图片，将它们改成span标签，设置为display： inline-block的类型，长宽和原png图片一样，然后配上progid：DXImageTransform.Microsoft.AlphaImageLoader（src="png图片路径",sizingMethod="crop"）的滤镜，实现png的透明效果，再遍历页面内所有元素，检查它们是否有png的背景图，如果有，则将背景图去掉，改用滤镜，这种方法调用非常方便，只要将这段代码放入网页中任意地方，当页面加载完成后，png图片都可以实现透明。但他也存在一定问题：
+	1.当页面全部加载完成前，png图片的透明部分仍然会显示为浅蓝；
+	2.遍历所有元素，执行效率不高；
+	3.当png是以背景形式插入网页的，它有可能有background-position和background-repeat属性，而滤镜是不支持这两个属性的，这两个属性的效果会丢失。
+
+///////////////////////////////////////////////////////////////
+如何处理上下margin：
+上下左右都做成单独的类，使用组合进行拼接
+尽量只是用margin-top或者margin-bottom，防止出现上下margin合并以后出现问题的情况。
+
+
+低权重原则-避免滥用子选择器
+css设置的样式是可以重叠的，当样式重叠之时就要考虑到css的权重问题，权重高的样式会被采用。
+权重的规则是这样的：html标签的权重是1，class权重是10，id的权重是100，例如p的权重是1，‘div em’的权重是1+1=2，‘strong.demo’的权重是10+1=11，‘#test.red’的权重是100+10=110.
+PS：为了保证样式容易被覆盖，提高可维护性，CSS选择符需保证权重尽可能低。
+
+
+-----------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

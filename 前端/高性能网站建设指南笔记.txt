@@ -1,0 +1,167 @@
+1.Expires头
+	使用Expires Header可以使用缓存来减少http请求的数量，并减少http响应的大小，使web页面加载得更快。Web服务器使用Expires头来告诉Web客户端它可以使用一个组件的当前副本，直到指定的时间为止。它在http响应中发送
+	Expires: Thu, 15 Apr 2010 20:00 GMT
+
+2.Max-Age and mod-expires
+	因为Expires头使用一个特定的时间，它要求服务器和客户端的时钟严格同步。另外，过期日期需要经常检查，并且一旦未来这一天来了，还需要在服务器配置中提供一个新的日期。
+
+	Cache-Control使用max-age指令指定组件被缓存多久。它以秒为单位。如果从组件被请求开始过了时间少于max-age，浏览器就使用缓存的组件。
+	Cache-Control: max-age=315360000
+
+	使用带有max-age的Cache-Control可以消除Expires的限制，但对于不支持http1.1的浏览器，就可以同时指定两个响应头，Expires和Cache-Control max-age。如果两者同时出现，http规范规定max-age指令重写Expires。
+
+	mod_expires Apache模块，使你能在使用Expires头时能够以max-age的方式设置日期。这通过Expires-Default指令来完成。下面例子中，图片，脚本和样式表的过期时间被设计为自请求开始的十年之后：
+		<FilesMatch "\.(gif|jpg|js|css)$">
+		ExpiresDefault "access plus 10 years"
+		</FilesMatch>
+
+3.为了确保用户可以获得最新的页面。
+	可以重新命名html链接名称使得用户重新下载资源，例如可以为文件增加版本号。
+
+
+4.压缩组件。
+	可以在http请求中加入Accept-Encoding: gzip/deflate（任选）
+	gzip这是GNU项目开发的一种免费的格式，并被标准化为RFC 1952.而deflate效果略逊并且不太流行。而且很多浏览器不支持deflate但是支持gzip。
+
+	一般来讲，样式表和脚本最适合压缩，html文档也可以压缩，而图片和pdf则不应该被压缩。
+
+	压缩组件的配置：
+		Apache1.3使用mod_gzip，而Apache2.x使用mod_deflate。使用Apache因为它是Internet上最流行的服务器。
+
+		Apache1.3   常用指令有：
+		mod_gzip_on//启用mod_gzip
+		mod_gzip_item_include
+		mod_gzip_item_exclude
+		//基于文件类型，mime类型，用户代理等定义哪些需要压缩，哪些不需要。
+		很多服务器默认为text/html打开了mod_gzip。你所要做的事情就是修改明确压缩脚本的样式表。可以使用下面的Apache1.3指令来完成。
+			mod_gzip_item_include	file \.js$
+			mod_gzip_item_include	mime ^application/x-javascript$
+			mod_gzip_item_include	file \.css$
+			mod_gzip_item_include	mime ^text/css$
+
+		Apache2.x--mode-deflate
+		上一节中对压缩脚本和样式表进行的基本配置都可以在一行中完成:
+			addOutputFileterByType DEFLATE text/html text/css application/x-javascript
+		和mod_gzip不同，mod_deflate包含了一个用于控制压缩级别的指令----DeflateCompressionLevel。
+
+5.代理缓存
+	如果浏览器第一次通过不支持gzip的代理发来请求，则获取了未被压缩的文件，而第二次若使用支持gzip的浏览器，则因为缓存中已有文件，则不会更新，仍将使用未被压缩的文件。而如果第一次的支持gzip，第二次的不支持，会使得压缩后的文件无法正常读取。
+	解决方法是在Web服务器的响应中添加Vary头。Web服务器可以告诉代理根据一个或多个请求头来改变缓存的响应。由于压缩的决定是基于Accept-Encoding请求头的，因此需要在服务器的Vary响应头中包含Accept-Encoding。
+	Vary: Accept-Encoding
+	这样可以使得代理缓存响应的多个版本为Accept-Encoding请求头的每个值都缓存一份。
+
+6.边缘情形
+	可以通过制定浏览器白名单，使那些不支持gzip的浏览器不下载压缩后的文件。
+	在Apache1.3中mod_gzip中，可以通过子啊mod_gzip_item_include中使用恰当的User-Agent值来指定浏览器白名单。
+		mod_gzip_item_include "User-Agent: MSIE [6-9]"
+		mod_gzip_item_include "User-Agent: Mozilla/[5-9]"
+
+	在Apache2.x中可以使用BrowserMatch指令：
+		BrowserMatch ^MSIE [6-9] gzip
+		BrowserMatch ^Mozilla/[5-9] gzip
+	把代理缓存加进来后，处理这些边缘情形浏览器将变得更为复杂。你不可能和代理共享浏览器白名单。
+	所以最佳做法是将User-Agent作为代理的另外一种评判标准添加到Vary头中。
+		Vary: Accept-Encoding,User-Agent
+	当mod_gzip检测到你在使用浏览器白名单时，它会自动将User-Agent字段添加到Vary头。不幸的是，User-Agent有上千种不同的值。代理不太可能为其所代理的所有URL缓存Accept-Encoding和User-Agent的全部组合。
+	另外一种方式是，禁用代理缓存。
+		Vary:*或Cache-Control: private
+		google和yahoo都使用了这种方式。记住这是为所有浏览器禁用代理缓存，因此会增加你的带宽开销，因为代理无法缓存你的内容。
+
+7.将样式表放在顶部
+	加载样式表放在head中可以保证页面一定是逐步加载的。
+	加载样式表有两种方式
+	<link rel="stylesheet" href="stylesheet.css">
+	<style>
+		@import url("stylesheet.css");
+	</style>
+	一个style块可以包含多个import规则，但@import规则必须放在其他规则之前。否则无法加载。
+	不过@import可能会导致白屏。
+
+8.将脚本放在底部
+	如果将脚本放在顶部，那么脚本会阻塞对后面内容的呈现，以及对其后面组件的下载。
+	并且可以让可视部分的下载加快。
+
+9.避免css表达式
+	对于很多动态页面，可以使用css表达式将背景色设置为每小时变化一次。
+		background-color: expression ((new Date()).getHours()%2?"#B8D4EF":"#F08A00");
+	如上所示，expression方法接受一个javascript表达式。
+	这种方法其他被其他浏览器忽略了，但是IE支持。
+	IE不支持min-width属性，所以：
+		width: expression(document.body.clientWidth<600?"600px":"auto");
+		min-width: 600px;
+	大多数浏览器会忽略width而使用min-width，而IE则支持css表达式。但是css的频繁求值使得css表达式的性能低下。
+
+	解决方案：
+		一次性表达式
+			在expression中嵌入javascript函数来返回给css表达式一个确定的值。
+		事件处理器
+
+10.使用外部的javascript和css
+	纯粹而言，内联要快一些。但是这样我们就无法缓存javascript和css。
+	一个用户查看得越少的页面，就越适合内联javascript和css。
+
+	组件重用。可以将javascript和css模块化。然后在需要时进行组合。
+
+	主页有时候比较适合内联，因为主页和其他页面的重用性关系联系可能会小一些，并且主页访问量大。
+
+	我们有一种两全其美的方法，在页面加载完成之后动态下载。
+	用onload方法在页面加载完成以后，接着开辟新节点，在新节点中加入src，使得浏览器自动下载css和javascript。
+
+	动态内联：	可以通过检测有没有cookie来判断是否添加javascript来动态加载外部文件。
+
+11.减少DNS查找
+	DNS的存活时间TTL(Time-to-live)，Microsoft Windows上的DNS缓存由DNS Client服务管理，可以使用ipconfig来管理和刷新DNS缓存。重新启动也可以清空DNS缓存，而浏览器自身也有自己的DNS缓存，重新启动可以清楚浏览器本身的缓存，但是不能清楚DNS Client的服务缓存。
+
+	Internet Explorer
+		IE的DNS缓存由三个注册表项目来管理，分别为DnsCacheTimeOut，KeepLiveTimeOut和ServerInfoTimeOut。
+		可以创建在下面的注册表键下
+			HKEY_CURRENT_USER\Softwave\Microsoft\Windows\CurrentVersion\InternetSettings\
+		这三项数值的默认值分别是30min，1min，2min。
+		KeepLiveTimeOut说明了如果这个通道1min不使用，就会断开。
+		而ServerInfoTimeOut说明一个主机名如果每隔两分钟就重用一次，并且没有发生错误，那么可以持续30min不进行DNS查找。
+
+	FireFox
+		firefox的配置如下
+			network.dnsCacheExpiration——1min
+			network.dnsCacheEntries——20条
+			network.http.keep-alive.timeout——5min
+		而经过验证，最佳时间设置为
+			network.dnsCacheExpiration——1h
+			network.dnsCacheEntries——512条
+			network.http.keep-alive.timeout——30s
+
+12.精简javascript
+	在真正发布的时候，去除不必要的空格，换行符和制表符。
+
+	精简方式-混淆：会改写函数名，变量名等，缩短长度。但是混淆可能会导致一些问题，但是精简不会。
+
+	精简方式-节省：例如JSmin。
+
+13.避免重定向
+	添加结尾的斜线，在url的结尾，如果是例如http://astrology.yahoo.com/astrology时，会产生重定向，这个请求会导致一个301响应，其中包含了一个到http://astrolgy.yahoo.com/astrology/的重定向。
+	但是，在主机名之后缺少结尾斜线时是不会发生重定向的。例如http://www.yahoo.com的时候就不会产生重定向，但是最最终url上是会包含结尾斜线的。导致产生自动结尾斜线原因是，浏览器进行get请求时必须给一个路径，如果没有路径，就会使用/这种根路径进行请求。
+
+14.移除重复脚本
+
+15.配置ETag
+	ETag(Entity Tag，ETag)是web服务器和浏览器用于确认缓存组件的有效性的一种机制。在进入ETag的细节之前，我们先回顾一下组件是如何被缓存和确认的。
+
+	Expires头
+	浏览器下载组件时，会将它们存储到缓存里，在后续的页面查看中，如果缓存的组件是“新鲜的”，浏览器就会从磁盘上读取它，避免产生http请求。如果组件没有过期，那么它就是新鲜的，这取决于Expires头的值。
+
+	实体标签
+		ETag提供了另外一种方式，用于检测浏览器缓存中的组件与原始服务器上的组件是否匹配。ETag在http1.1中引入。ETag是唯一标识了一个组件的一个特定版本的字符串。唯一的格式约束是该字符串必须用引号引起来。
+
+		HTTP 1.1 200 OK
+		Last-Modified：Tue， Dec  03:03:59 GMT
+		ETag："10c24bc-4ab-457e1c1f"
+		Content-Length：1195
+
+	在ETag不必要的时候，可以移除ETag，可以提高加载速度。
+
+16.使ajax可缓存
+	很多规则也同样适用于ajax请求。
+	例如，压缩组件，减少dns请求，精简javascript，避免重定向，ETag。
+
+	使ajax可缓存，最好的方法是使用查询字符串参数。
+	

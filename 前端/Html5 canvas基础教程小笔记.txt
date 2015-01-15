@@ -1,0 +1,180 @@
+context.fileRect(1,2,3,4)
+这四个参数中，前两个参数是正方形原点的xy值，其余两个参数是矩形的宽度和高度。矩形宽度是向xy位置向右绘制的距离。即右下绘图。
+即：context.fileRect(x,y,width,height);
+
+与fileRect相对应的方法是strokeRect。fileRect绘制一个矩形并给它填充颜色，strokeRect则是绘制一个矩形并给它绘制边框，也就是用线条绘制出矩形的轮廓。
+
+baginPath();//开始路径
+moveTo(x,y);//设置路径原点
+lineTo(x,y)l//设置路径终点
+closePath();//结束路径
+sroke();//绘制出路径轮廓
+
+
+arc(230,90,50,0,Math.PI*2,false);//绘制一个圆形
+这里的参数可以写成这样
+arc(x,y,radius,startAngle,endAngle,anticlockwise);
+开始角度和结束角度看起来很简单，但是需要解释一下。简言之，在canvas中，一条弧线是由一条曲线定义的，它从原点(x,y)一个半径且角度为结束角度的位置上。
+注意，canvas中的角度是以弧度而不是角度为单位的。简单地说，360度是2π弧度。
+角度换算弧度
+var degrees= 1;
+var radians=degrees*(Math.PI/180);
+
+HTML5Canvas中的save和restore
+////////////////////////////////////
+----------------样式-----------
+1.颜色的改变
+
+filestyle='rgb(255,0,0)';
+直接赋值颜色
+
+还可以在描边图形和路径上使用strokeStyle属性实现变色效果。例如，下面的代码与前一个例子相同，唯一区别是它使用笔画描边而不是填充。
+
+2.修改线宽
+修改颜色很有趣，但是我们例子中的线条还有些细。canvas有一个方法可以增加线宽，即2D渲染上下文的；lineWidth属性。lineWidth属性的默认值为1.
+
+lineWidth属性也会影响图形。(只加粗边框的样子)
+
+----------------绘制文本--------------------
+canvas的文本是以图像形式绘制的，只是像文本而已。一旦文字绘制之后就无法编辑，除非先擦出文字。本书建议尽量不要使用文本绘图功能，而是使用普通的html元素，然后用css定位到canvas上。使文本和图像处理分离。
+
+fillText(text,x,y);
+2D渲染上下文的fillText方法可接受4个参数(本例中省略了)，第一个参数是准备绘制的文本，第二个和第三个是文本原点(左下角)的xy值。
+canvas的默认文本设置是10px sans-serif。现在让我们修改字号，同时也会介绍修改字体的方法。要实现这个操作，你需要设置2D渲染上下文的font属性，如下所示：
+conText.font='30px serif';//修改字号和字体。
+如果想要设置斜体，则只需要设置为'italic 30px serif';
+
+接下来是描边文本，实例为
+strokeText(text,x,y);
+
+
+
+-----------------擦除canvas---------------
+clearRect(x,y,width,height);
+如果width和height设置为canvas元素本身的对应值，那么整张canvas就会被擦除。
+
+
+canvas的宽高可以使用window对象获取窗口宽度和高度，然后添加给canvas属性以便使得canvas全屏
+
+
+-------------------------------------
+平移
+translate(x,y);
+两个参数是xy坐标值，其移动的值为你所指定的xy坐标值加上原点的平移。
+PS：每一种变形方式，包括平移，都会影响方法执行后所绘制的所有元素。这是因为它们都是直接在2D渲染上下文上操作的，而不是只针对所绘制的图形，这与你修改了fillStyle等属性的效果一样，新的颜色会影响后来挥之的所有元素。
+
+缩放
+scale(x,y);
+这两个参数是缩放倍数，如为2即为相应方向*2；
+如果只是想要单纯的缩放，可以用scale和translate组合。
+
+旋转
+rotate(radius);
+参数为旋转的弧度，但是该方法本身默认是将画布以原点为圆心进行旋转，如果想要得到对图像本身的旋转，则如下：
+conText.translate(200,200);//平移到正方形中心
+conText.rotate(0.7854);//旋转45度角
+conText.fillRect(-50,-50,100,100);//以旋转点为中心绘制一个正方形
+
+
+变换矩阵
+变换矩阵在画布中，是一个3*3矩阵。
+
+a c e
+b d f
+0 0 1
+
+X轴缩放 X轴倾斜 X轴平移
+Y轴倾斜 Y轴缩放 Y轴平移
+ 0          0      1
+
+操作变换矩阵
+transform(2,0,0,2,150,150);
+setTransform();
+
+transform方法有6个参数，分别对应变换矩阵的每一个值，第一个表示a，最后一个表示f。在这个例子中，你想将画布的尺寸放大2倍，所以将第一个和第四个参数设置为2，即a和d，分别对应x轴缩放和y轴缩放。如果平移画布，则将第五六个参数，即e和f，分别对应X轴平移和Y轴平移。
+
+
+conText.setTransform(1,0,0,1,0,0);//单位矩阵
+var xScale=Math.cos(0.7854);
+var ySkew=-Math.sin(0.7854);
+var xSkew=Math.sin(0.7854);
+var yScale=Math.cos(0.7854);
+var xTrans=200;
+var yTrans=200;
+
+conText.transform(xScale,ySkew,xSkew,yScale,xTrans,yTrans);
+conText.fillRect(-50,-50,100,100);
+
+
+接着是setTransform方法，这是第二个操作变换矩阵的方法，它的作用是将矩阵重置为单位矩阵，然后按照6个参数执行变形。在这个例子中，使用它来重置变换矩阵，从而保证你所操作的是一个原始状态的变换矩阵。
+
+需要指出的是，transform方法实际上是将现有的变换矩阵乘以你所指定的值，而不是直接设置变换矩阵的值。这意味着期中会有一个累积效应。
+
+globalAlpha值，所设置的是全局阿尔法值。
+表达式为conText.globalAlpha=0.5;
+全局阿尔法值会影响rgba中所设置的阿尔法值。
+
+----------------合成操作---------------------
+合成类型共有11种
+
+1.context.globalCompositeOperation='source-over';
+这是默认值，它表示绘制的图形将画在现有画布之上，即正常绘图的情况。即新对象覆盖旧对象。
+2.context.globalCompositeOperation='destination-over';
+效果与前一个操作恰好相反。即新对象会被就旧对象覆盖。
+3.source-atop;
+这个操作会将源绘制在目标之上，但是在重叠区域上两者都是不透明的，并且依然新对象覆盖旧对象。绘制在其他位置的目标会是不透明的。即，只有两者重叠的部分新对象才能看到。
+4.destination-atop;
+这个操作与source-atop相反，重叠区域两者不透明，其他部分上的旧对象透明，而新对象不透明；
+5.source-in;
+在源与目标重叠的部分只绘制新对象，不重叠部分两者都变成透明。
+6.destination-in;
+这个操作与source-in相反，在源与目标重叠的部分只绘制旧对象，不重叠部分两者都变成透明。
+7.source-out;
+在与旧对象不重叠的区域上绘制新对象。其他部分都变成透明的。
+8.destination-out;
+这个操作与source-atop相反，在与新对象不重叠的区域上绘制旧对象。其他部分都变成透明的。
+9.lighter
+这个值与顺序无关，如果新对象和旧对象重叠，就将两者的颜色相加。得到的颜色值得最大取值为255，结果就是白色。
+10.copy
+这个值与顺序无关，只绘制新对象，覆盖掉旧对象。
+11.xor(异或)
+这个值与顺序无关，只绘制出不重叠的新目标与旧对象区域。所有重叠的部分都变成透明的。
+
+----------阴影---------------
+在canvas中创建阴影效果可以通过四个全局变量进行控制。这些属性是shadowBlur,shadowOffsetX,shadowOffsetY,shadowColor。默认情况下，2D渲染上下文是不会绘制阴影效果的，因为shadowBlur,shadowOffsetX和shadowOffsetY都设置为0，而shadowColor则设置为透明黑色。
+创建阴影效果的唯一方法是将shadowColor都修改为不透明值，同时将shadowBlur，shadowOffsetX和shadowOffsetY都设置为非0值：
+context.shadowBlur=20;
+context.shadowColor='rgb(0,0,0)';
+context.filRect(50,50,100,100);
+在这个例子中，给阴影设置了20像素的模糊值，并将它的颜色设置为完全不透明的黑色。阴影的偏移值在X轴和Y轴上仍然保持为默认值0.需要特别指出的是，即使使用了不透明的黑色，但是由于采用了模糊效果，这个阴影在边界上仍然有些透明效果。
+将模糊修改为0，就能得到清晰的阴影效果。
+
+----------渐变---------------
+fillStyle和strokeStyle都可以接受CanvasGradient对象表示的渐变颜色值。
+
+画布支持两种类型的渐变：线性渐变和放射渐变。每一种渐变在2D渲染上下文中都有对应的创建方法，线性渐变对应的是creatLinearGradient，而放射渐变对应的是creatRadialGradient。这两种方法都返回一个CanvasGradient对象，可以使用该对象本身自带的addColorStop方法对它进行进一步处理。下面让我们创建一个基本的线性渐变，以了解它们的使用方法。
+//暂时省略，以后用到再去翻，PDF107处
+
+中途跳过了好几个内容，╮(╯▽╰)╭用到再翻吧。
+-------将画布导出为图像---------
+
+var dataURL=canvas.get(0).toDataURL();
+这段代码将图像数据URL赋值给dataURL变量。
+这个dataURL变量里存储的值例如：
+data:image/png;base64,ivbo.......
+事实上它非常长，但是真正有用处的只有前面几个单词。前面三个单词data:image/png;表明它是一个png格式的图像的数据URL。第四个单词表明数据采用base64编码，即二进制传输。
+
+你可以使用例子中生成的图像替换canvas元素：
+var dataURL=canvas.get(0).toDataURL();
+var img=$('<img></img>');
+img.attr('src',dataURL);
+
+canvas.replaceWith(img);
+这段代码使用jQ创建了一个全新的HTML img元素，然后将图像数据赋值给它的src属性，最后用jQ的replaceWith方法将canvas元素替换成刚刚创建的img元素，这样，我们就得到一个图像。
+PS：base64数据比它表示的原始二进制图像数据大50%。
+
+/*/*/**/**/*/*接着的部分，从116开始，暂时不用看*/*//*
+
+
+153P
+
